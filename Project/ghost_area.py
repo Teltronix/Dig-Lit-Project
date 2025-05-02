@@ -55,7 +55,7 @@ for img_name in DOOR_IMAGES:
 
 # Position doors with a fixed margin between them
 if door_images:
-    margin = 400  # ← pixels gap between the two doors; increase to push them further apart
+    margin = 600  # ← pixels gap between the two doors; increase to push them further apart
     widths = [img.get_width() for img in door_images]
     total_w = sum(widths) + margin * (len(door_images) - 1)
     start_x = (WIDTH - total_w) // 2
