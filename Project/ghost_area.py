@@ -1,9 +1,12 @@
-
 import pygame
 import sys
+import os
 import spritesheet
 
 pygame.init()
+
+# Dynamically construct the base path
+base_path = os.path.dirname(__file__)
 
 # Screen setup
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
@@ -11,8 +14,9 @@ WIDTH, HEIGHT = screen.get_size()
 pygame.display.set_caption("Ghost World")
 clock = pygame.time.Clock()
 
-# Load ghost sprite sheet
-ghost_sprite_image = pygame.image.load('Ghost.png').convert_alpha()
+# Load ghost sprite sheet using an absolute path
+ghost_sprite_path = os.path.join(base_path, 'Ghost.png')
+ghost_sprite_image = pygame.image.load(ghost_sprite_path).convert_alpha()
 ghost_sheet = spritesheet.Ghost(ghost_sprite_image)
 ghost_frames = [ghost_sheet.get_image(i, 32, 32, scale=9) for i in range(4)]
 ghost_frame = 0

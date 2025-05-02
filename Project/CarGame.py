@@ -9,16 +9,20 @@ pygame.init()
 
 next_file = None
 
+# Dynamically construct the base path
+base_path = os.path.dirname(__file__)
+
 # Screen setup
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 WIDTH, HEIGHT = screen.get_size()
 pygame.display.set_caption("Midnight Motorist Style")
 clock = pygame.time.Clock()
 
-# Load sprite sheets and images
-car_sprite_image = pygame.image.load('Car.png').convert_alpha()
-tree_original = pygame.image.load('Tree.png').convert_alpha()
-enemy_car_image = pygame.image.load('rac.png').convert_alpha()
+# Load sprite sheets and images using absolute paths
+car_sprite_image = pygame.image.load(os.path.join(base_path, 'Car.png')).convert_alpha()
+tree_original = pygame.image.load(os.path.join(base_path, 'Tree.png')).convert_alpha()
+enemy_car_image = pygame.image.load(os.path.join(base_path, 'rac.png')).convert_alpha()
+road_img = pygame.image.load(os.path.join(base_path, 'road.png')).convert()
 
 # Resize tree to 32px wide and maintain aspect ratio
 aspect_ratio = tree_original.get_height() / tree_original.get_width()
@@ -47,7 +51,6 @@ bleeding = False
 bleed_last_update = pygame.time.get_ticks()
 
 # Road
-road_img = pygame.image.load("road.png").convert()
 road_img = pygame.transform.scale(road_img, (WIDTH, HEIGHT))
 road_x = 0
 scroll_speed = 10
@@ -159,6 +162,8 @@ while running:
 pygame.quit()
 
 if next_file:
-    subprocess.Popen(["python3", next_file])
+    # Dynamically construct the absolute path for the next file
+    next_file_path = os.path.join(base_path, next_file)
+    subprocess.Popen(["python3", next_file_path])
 
 sys.exit()
