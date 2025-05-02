@@ -4,7 +4,7 @@ pygame.init()
 
 # Screen setup
 screen = pygame.display.set_mode((480, 480))
-pygame.display.set_caption("-.. . .- - ....")
+pygame.display.set_caption("Maybe go left (you lost)")
 
 # Load and scale background image
 background = pygame.image.load("winbg.png").convert()
