@@ -1,5 +1,7 @@
 import pygame
 import sys
+import os
+import subprocess
 
 pygame.init()
 
@@ -24,14 +26,30 @@ waveform = spike_pattern * 5 + flatline_pattern
 ekg_x = 0
 points = []
 
-# Main loop
+# The script to run after 15 seconds:
+NEXT_SCRIPT = 'Maze.py'  # ← replace with your target file
+
+# Record when we started
+start_time = pygame.time.get_ticks()
+launched = False
+
 running = True
 while running:
-    screen.fill(BLACK)
+    dt = clock.tick(15)
+    now = pygame.time.get_ticks()
 
     for event in pygame.event.get():
-        if event.type == pygame.QUIT or event.type == pygame.KEYDOWN:
+        if event.type in (pygame.QUIT, pygame.KEYDOWN):
             running = False
+
+    # After 15 seconds, launch the next script once
+    if not launched and now - start_time >= 15000:
+        launched = True
+        pygame.quit()
+        # Build absolute path to the next script
+        next_path = os.path.join(os.path.dirname(__file__), NEXT_SCRIPT)
+        subprocess.Popen([sys.executable, next_path])
+        sys.exit()  # ensure this script exits immediately
 
     # Generate waveform
     if step < len(waveform):
@@ -49,12 +67,11 @@ while running:
         points = []
         step = len(waveform)  # go straight to flatline
 
-    # Draw line
+    # Draw
+    screen.fill(BLACK)
     if len(points) > 1:
         pygame.draw.lines(screen, GREEN, False, points, 3)
-
     pygame.display.flip()
-    clock.tick(15)
 
 pygame.quit()
 sys.exit()
