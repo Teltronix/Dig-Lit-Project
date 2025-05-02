@@ -6,17 +6,17 @@ pygame.init()
 
 # Dynamically construct the absolute path to Brain.png
 base_path = os.path.dirname(__file__)  # Directory of the current script
-image_path = os.path.join(base_path, 'Brain.png')
+image_path = os.path.join(base_path, 'Person.png')
 
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 WIDTH, HEIGHT = screen.get_size()
-pygame.display.set_caption("Brain Area")
+pygame.display.set_caption("????")
 clock = pygame.time.Clock()
 
 # Load the image using the dynamically constructed path
-brain_sprite_image = pygame.image.load(image_path).convert_alpha()
-sprite_sheet = spritesheet.BrainSprite(brain_sprite_image)
-animation_list = [sprite_sheet.get_image(i, 32, 32, scale=10) for i in range(5)]
+person_sprite_image = pygame.image.load(image_path).convert_alpha()
+sprite_sheet = spritesheet.playerv1(person_sprite_image)
+animation_list = [sprite_sheet.get_image(i, 32, 32, scale=10) for i in range(4)]
 
 font = pygame.font.SysFont(None, 28)
 text_lines = [
