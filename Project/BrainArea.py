@@ -1,4 +1,6 @@
 import os
+import sys
+import subprocess
 import pygame
 import spritesheet
 
@@ -8,103 +10,150 @@ pygame.init()
 base_path = os.path.dirname(__file__)
 image_path = os.path.join(base_path, 'Brain.png')
 
-# Set up screen
+# Door config
+DOOR_IMAGES   = ['Green_Dungeon_Door.png', 'Pink_Dungeon_Door.png']
+DOOR_SCRIPTS  = ['death area.py', 'CarGame.py']
+DOOR_SCALE    = 5   # scale doors by this factor
+
+# Screen
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 WIDTH, HEIGHT = screen.get_size()
 pygame.display.set_caption("Brain Area")
 clock = pygame.time.Clock()
 
-# Load sprite
+# Player animation
 brain_sprite_image = pygame.image.load(image_path).convert_alpha()
-sprite_sheet = spritesheet.BrainSprite(brain_sprite_image)
-animation_list = [sprite_sheet.get_image(i, 32, 32, scale=10) for i in range(5)]
+sprite_sheet       = spritesheet.BrainSprite(brain_sprite_image)
+animation_list     = [sprite_sheet.get_image(i, 32, 32, scale=10) for i in range(5)]
 
-# Font setup
+# Font
 font = pygame.font.SysFont(None, 28)
 
 # Narrative text
 story_lines = [
     "There was a hallway I used to know.",
     "It smelled like dust and disinfectant. The lights hummed even when everything else stayed quiet.",
-    "I don’t know where it led, but I walked it often. Maybe too often. Maybe not at all.",
-    "Time doesn’t work here. I measure it in flickers. In loops. In the way my shadow moves even when I don’t.",
-    "I see things sometimes. Not in the corner of my eye. I’m past that now.",
-    "I see them in the middle. The direct gaze. The center of attention. And still, they don’t stay.",
-    "There was a door once. I think I passed through it. Or maybe I stood outside it and forgot why I knocked.",
-    "This place doesn’t hurt. That’s the strange part. It should. The silence should ache. The repetition should grind.",
-    "But I feel nothing.",
-    "Someone used to say my name. I don't know who. It echoes in shapes, not sound.",
-    "I try to piece things together. I remember lights. Red, then white. Movement. Then none.",
-    "I remember my chest rising. Then rising again. Too steady. Too regular.",
-    "My hands don’t do what they should. I think I had hands. I think they were mine.",
-    "I am not asleep. I am not awake.",
-    "I am in between.",
+    # … rest of your lines …
     "And something is watching me wait."
 ]
 
-# Typewriter effect setup
-current_line = 0
-current_text = ''
-char_index = 0
-type_delay = 30
-last_char_time = pygame.time.get_ticks()
-displayed_lines = []
+# Typewriter state
+current_line       = 0
+current_text       = ''
+char_index         = 0
+type_delay         = 30
+pause_delay        = 1000
+last_char_time     = pygame.time.get_ticks()
+line_finished      = False
+line_finished_time = 0
+displayed_lines    = []
+story_finished     = False
 
-# Player setup
-player_rect = animation_list[0].get_rect(center=(WIDTH // 2, HEIGHT // 2))
-frame = 0
-animation_cooldown = 125
-last_update = pygame.time.get_ticks()
-speed = 5
+# Player
+player_rect    = animation_list[0].get_rect(center=(WIDTH//2, HEIGHT//2))
+frame          = 0
+anim_cooldown  = 125
+last_update    = pygame.time.get_ticks()
+speed          = 5
 
-# Game loop
+# Load & scale doors
+door_images = []
+door_rects  = []
+for img_name in DOOR_IMAGES:
+    img = pygame.image.load(os.path.join(base_path, img_name)).convert_alpha()
+    w, h = img.get_size()
+    img = pygame.transform.scale(img, (w * DOOR_SCALE, h * DOOR_SCALE))
+    door_images.append(img)
+
+# Position doors with a fixed margin between them
+if door_images:
+    margin = 600  # pixels between each door
+    widths = [img.get_width() for img in door_images]
+    total_w = sum(widths) + margin * (len(door_images) - 1)
+    start_x = (WIDTH - total_w) // 2
+
+    x = start_x
+    for img in door_images:
+        rect = img.get_rect(midbottom=(x + img.get_width()//2, HEIGHT - 50))
+        door_rects.append(rect)
+        x += img.get_width() + margin
+
+# Main loop
 running = True
 while running:
-    dt = clock.tick(60)
+    dt  = clock.tick(60)
+    now = pygame.time.get_ticks()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                running = False
-            if event.key == pygame.K_SPACE and char_index >= len(story_lines[current_line]):
-                displayed_lines.append(story_lines[current_line])
-                current_line += 1
-                if current_line >= len(story_lines):
-                    current_line = len(story_lines) - 1
-                current_text = ''
-                char_index = 0
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            running = False
+        elif story_finished and event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+            # Launch door script if standing on it
+            for idx, rect in enumerate(door_rects):
+                if player_rect.colliderect(rect):
+                    pygame.quit()
+                    subprocess.Popen([sys.executable,
+                                      os.path.join(base_path, DOOR_SCRIPTS[idx])])
+                    running = False
+                    break
 
+    # Player movement
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT] and player_rect.left > 0:
-        player_rect.x -= speed
-    if keys[pygame.K_RIGHT] and player_rect.right < WIDTH:
-        player_rect.x += speed
-    if keys[pygame.K_UP] and player_rect.top > 0:
-        player_rect.y -= speed
-    if keys[pygame.K_DOWN] and player_rect.bottom < HEIGHT:
-        player_rect.y += speed
+    if keys[pygame.K_LEFT]  and player_rect.left > 0:      player_rect.x -= speed
+    if keys[pygame.K_RIGHT] and player_rect.right < WIDTH: player_rect.x += speed
+    if keys[pygame.K_UP]    and player_rect.top > 0:       player_rect.y -= speed
+    if keys[pygame.K_DOWN]  and player_rect.bottom < HEIGHT: player_rect.y += speed
 
-    current_time = pygame.time.get_ticks()
-    if current_time - last_update >= animation_cooldown:
+    # Animate player
+    if now - last_update >= anim_cooldown:
         frame = (frame + 1) % len(animation_list)
-        last_update = current_time
+        last_update = now
 
-    if char_index < len(story_lines[current_line]) and current_time - last_char_time > type_delay:
-        current_text += story_lines[current_line][char_index]
-        char_index += 1
-        last_char_time = current_time
+    # Typewriter
+    if not story_finished and not line_finished:
+        if char_index < len(story_lines[current_line]) and now - last_char_time > type_delay:
+            current_text += story_lines[current_line][char_index]
+            char_index += 1
+            last_char_time = now
+        elif char_index >= len(story_lines[current_line]):
+            line_finished      = True
+            line_finished_time = now
 
-    screen.fill((0, 0, 0))
-    screen.blit(animation_list[frame], player_rect)
+    # After pause, lock in line & advance
+    if line_finished and not story_finished and now - line_finished_time > pause_delay:
+        displayed_lines.append(story_lines[current_line])
+        current_line += 1
+        if current_line >= len(story_lines):
+            story_finished = True
+        else:
+            current_text  = ''
+            char_index    = 0
+            line_finished = False
 
+    # --- DRAW ---
+    screen.fill((0,0,0))
+
+    # 1) draw all past lines
     for i, line in enumerate(displayed_lines):
-        line_surf = font.render(line, True, (255, 255, 255))
-        screen.blit(line_surf, (20, 20 + i * 30))
+        surf = font.render(line, True, (255,255,255))
+        screen.blit(surf, (20, 20 + 30*i))
 
-    current_surf = font.render(current_text, True, (255, 255, 255))
-    screen.blit(current_surf, (20, 20 + len(displayed_lines) * 30))
+    # 2) draw current typing line
+    if not story_finished:
+        surf = font.render(current_text, True, (255,255,255))
+        screen.blit(surf, (20, 20 + 30*len(displayed_lines)))
+
+    # 3) once done, draw doors behind the player
+    if story_finished:
+        for img, rect in zip(door_images, door_rects):
+            screen.blit(img, rect)
+        instr = font.render("Walk to a door and press SPACE to enter", True, (255,255,255))
+        screen.blit(instr, (20, HEIGHT-40))
+
+    # 4) draw player on top
+    screen.blit(animation_list[frame], player_rect)
 
     pygame.display.flip()
 
