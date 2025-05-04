@@ -1,17 +1,17 @@
 import pygame
 import os
+from util import resource_path
 
 pygame.init()
 
 # Dynamically construct the base path
-base_path = os.path.dirname(__file__)
 
 # Screen setup
 screen = pygame.display.set_mode((480, 480))
 pygame.display.set_caption("Maybe go left (you lost)")
 
 # Load and scale background image using an absolute path
-background_path = os.path.join(base_path, "winbg.png")
+background_path = resource_path('winbg.png')
 background = pygame.image.load(background_path).convert()
 background = pygame.transform.scale(background, (480, 480))
 

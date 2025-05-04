@@ -4,25 +4,23 @@ import os
 import random
 import spritesheet
 import subprocess
+from util import resource_path
 
 pygame.init()
 
 next_file = None
 
 # Dynamically construct the base path
-base_path = os.path.dirname(__file__)
 
 # Screen setup
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 WIDTH, HEIGHT = screen.get_size()
 pygame.display.set_caption("Midnight Motorist Style")
 clock = pygame.time.Clock()
-
-# Load sprite sheets and images using absolute paths
-car_sprite_image = pygame.image.load(os.path.join(base_path, 'Car.png')).convert_alpha()
-tree_original = pygame.image.load(os.path.join(base_path, 'Tree.png')).convert_alpha()
-enemy_car_image = pygame.image.load(os.path.join(base_path, 'rac.png')).convert_alpha()
-road_img = pygame.image.load(os.path.join(base_path, 'road.png')).convert()
+car_sprite_image = pygame.image.load(resource_path('Car.png')).convert_alpha()
+tree_original = pygame.image.load(resource_path('Tree.png')).convert_alpha()
+enemy_car_image = pygame.image.load(resource_path('rac.png')).convert_alpha()
+road_img = pygame.image.load(resource_path('road.png')).convert()
 
 # Resize tree to 32px wide and maintain aspect ratio
 aspect_ratio = tree_original.get_height() / tree_original.get_width()
@@ -58,6 +56,7 @@ scroll_count = 0
 
 # Tree
 tree_rect = pygame.Rect(WIDTH + 300, 20, tree_width, tree_height)
+tree_visible = False
 
 # Enemy cars (now include masks)
 enemy_cars = []
@@ -78,17 +77,22 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
 def draw_racing_area():
-    global road_x, scroll_count
+    global road_x, scroll_count, tree_visible, tree_rect
+
     road_x -= scroll_speed
     if road_x <= -WIDTH:
         road_x = 0
         scroll_count += 1
+        if scroll_count % 2 == 0:
+            tree_visible = True
+            tree_rect.x = WIDTH + 300
+        else:
+            tree_visible = False
 
     screen.blit(road_img, (road_x, 0))
     screen.blit(road_img, (road_x + WIDTH, 0))
     screen.blit(player_car_image, player_car_rect)
 
-    # Enemy cars
     for car_img, car_rect, _ in enemy_cars:
         car_rect.x -= scroll_speed
         if car_rect.x < -100:
@@ -96,8 +100,7 @@ def draw_racing_area():
             car_rect.y = random.randint(50, HEIGHT - 100)
         screen.blit(car_img, car_rect)
 
-    # Tree
-    if scroll_count >= 2:
+    if tree_visible:
         tree_rect.x -= scroll_speed
         screen.blit(tree_image, tree_rect)
 
@@ -135,7 +138,6 @@ while running:
             player_car_rect.y += 6
         player_car_rect.y = max(0, min(player_car_rect.y, HEIGHT - player_car_rect.height))
 
-        # Update player mask position
         for _, car_rect, car_mask in enemy_cars:
             offset = (car_rect.x - player_car_rect.x, car_rect.y - player_car_rect.y)
             if player_mask.overlap(car_mask, offset):
@@ -144,14 +146,12 @@ while running:
                 bleed_last_update = pygame.time.get_ticks()
                 state = IN_BLEEDING
 
-        # Check tree collision with rectangle
-        if scroll_count >= 2 and player_car_rect.colliderect(tree_rect):
+        if tree_visible and player_car_rect.colliderect(tree_rect):
             next_file = "ghost_area.py"
             running = False
 
-        # Animate
         player_car_image = car_frames[0]
-        player_mask = pygame.mask.from_surface(player_car_image)  # Refresh mask if animated
+        player_mask = pygame.mask.from_surface(player_car_image)
         draw_racing_area()
 
     elif state == IN_BLEEDING:
@@ -162,8 +162,7 @@ while running:
 pygame.quit()
 
 if next_file:
-    # Dynamically construct the absolute path for the next file
-    next_file_path = os.path.join(base_path, next_file)
+    next_file_path = resource_path(next_file)
     subprocess.Popen(["python3", next_file_path])
 
 sys.exit()

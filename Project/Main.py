@@ -2,11 +2,11 @@ import pygame
 import spritesheet
 import subprocess
 import os
+from util import resource_path
 
 pygame.init()
 
 # Dynamically construct the base path
-base_path = os.path.dirname(__file__)
 
 TILE_SIZE = 40
 MAZE = [
@@ -38,7 +38,7 @@ MAZE_HEIGHT = len(MAZE) * TILE_SIZE
 screen = pygame.display.set_mode((MAZE_WIDTH, MAZE_HEIGHT))
 
 # Load Brain.png using an absolute path
-brain_image_path = os.path.join(base_path, 'Brain.png')
+brain_image_path = resource_path('Brain.png')
 brain_sprite_image = pygame.image.load(brain_image_path).convert_alpha()
 sprite_sheet = spritesheet.BrainSprite(brain_sprite_image)
 animation_list = [sprite_sheet.get_image(i, 32, 32, scale=10) for i in range(5)]
@@ -72,14 +72,14 @@ while running:
     if (player_x, player_y) == EXIT_POS:
         pygame.quit()
         # Dynamically construct the absolute path for brain_area.py
-        brain_area_path = os.path.join(base_path, 'BrainArea.py')
+        brain_area_path = resource_path('BrainArea.py')
         subprocess.Popen(["python3", brain_area_path])
         exit()
     
     if (player_x, player_y) == WIN_POS:
         pygame.quit()
         # Dynamically construct the absolute path for win area.py
-        win_area_path = os.path.join(base_path, 'WinArea.py')
+        win_area_path = resource_path('WinArea.py')
         subprocess.Popen(["python3", win_area_path])
         exit()
 

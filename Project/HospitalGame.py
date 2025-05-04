@@ -5,17 +5,12 @@ import pygame
 import random
 import string
 import math
+from util import resource_path
 
 pygame.init()
 
-# — paths & helper —
-try:
-    BASE_PATH = os.path.dirname(os.path.abspath(__file__))
-except NameError:
-    BASE_PATH = os.getcwd()
-
 def load_image(name, alpha=True):
-    path = os.path.join(BASE_PATH, name)
+    path = resource_path(name)
     if not os.path.exists(path):
         raise FileNotFoundError(f"Missing asset: {path}")
     img = pygame.image.load(path)

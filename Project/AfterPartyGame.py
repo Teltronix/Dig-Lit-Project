@@ -3,21 +3,16 @@ import sys
 import subprocess
 import pygame
 import spritesheet
+from util import resource_path
 
 pygame.init()
 
-# — paths & config —
-try:
-    base_path = os.path.dirname(os.path.abspath(__file__))
-except NameError:
-    base_path = os.getcwd()
-
 # Helper to load images
 def load_image(name):
-    p = os.path.join(base_path, name)
-    if not os.path.exists(p):
-        raise FileNotFoundError(f"Missing asset: {p}")
-    return pygame.image.load(p).convert_alpha()
+    path = resource_path(name)
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Missing asset: {path}")
+    return pygame.image.load(path).convert_alpha()
 
 # — portal animator class —
 class Portal:
@@ -222,7 +217,7 @@ while running:
                     pygame.quit()
                     subprocess.Popen([
                         sys.executable,
-                        os.path.join(base_path, 'HospitalGame.py')
+                        resource_path('HospitalGame.py')
                     ])
                     sys.exit()
                 continue

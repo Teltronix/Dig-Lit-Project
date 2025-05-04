@@ -5,17 +5,12 @@ import pygame
 import random
 import string
 import math
+from util import resource_path
 
 pygame.init()
 
-# — paths & helper —
-try:
-    BASE_PATH = os.path.dirname(os.path.abspath(__file__))
-except NameError:
-    BASE_PATH = os.getcwd()
-
 def load_image(name):
-    path = os.path.join(BASE_PATH, name)
+    path = resource_path(name)
     if not os.path.exists(path):
         raise FileNotFoundError(f"Missing asset: {path}")
     return pygame.image.load(path).convert_alpha()
@@ -42,7 +37,7 @@ class Portal(playerv2): pass
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 SCREEN_W, SCREEN_H = screen.get_size()
 pygame.display.set_caption("Party Game")
-BG = pygame.image.load("Floor.png").convert()
+BG = pygame.image.load(resource_path('Floor.png')).convert()
 clock = pygame.time.Clock()
 WHITE, BLACK, GRAY = (255,255,255), (0,0,0), (80,80,80)
 
@@ -51,7 +46,7 @@ cryptic_name = ''.join(random.choice(string.ascii_uppercase + string.digits)
                        for _ in range(6))
 normal_font = pygame.font.SysFont(None, 32)
 hint_font   = pygame.font.SysFont(None, 24)
-gaster_font = pygame.font.Font(os.path.join(BASE_PATH, "wingdings.otf"), 36)
+gaster_font = pygame.font.Font(resource_path('wingdings.otf'), 36)
 portal_font      = pygame.font.SysFont(None, 28)
 portal_hint_font = pygame.font.SysFont(None, 18)
 
@@ -280,5 +275,5 @@ while running:
 pygame.quit()
 
 if portal_entered:
-    subprocess.Popen([sys.executable, os.path.join(BASE_PATH, next_file)])
+    subprocess.Popen([sys.executable, resource_path(next_file)])
     sys.exit()

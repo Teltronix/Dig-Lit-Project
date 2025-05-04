@@ -3,12 +3,10 @@ import sys
 import subprocess
 import pygame
 import spritesheet
+from util import resource_path
 
 pygame.init()
-
-# — paths & config —
-base_path  = os.path.dirname(__file__)
-ghost_sprite_path = os.path.join(base_path, 'Ghost.png')
+ghost_sprite_path = resource_path('Ghost.png')
 
 DOOR_IMAGES   = ['Green_Dungeon_Door.png', 'Pink_Dungeon_Door.png']
 DOOR_SCRIPTS  = ['PartyGame.py', 'death area.py']
@@ -176,7 +174,7 @@ door_rects  = []
 margin = 600 + 250
 widths = []
 for img_name in DOOR_IMAGES:
-    tmp = pygame.image.load(os.path.join(base_path, img_name)).convert_alpha()
+    tmp = pygame.image.load(resource_path(img_name)).convert_alpha()
     w, _ = tmp.get_size()
     widths.append(w * DOOR_SCALE)
 total_w = sum(widths) + margin * (len(widths) - 1)
@@ -185,7 +183,7 @@ door_y   = WORLD_HEIGHT - HEIGHT // 2  # half-screen above bottom
 
 x = start_x
 for img_name in DOOR_IMAGES:
-    img = pygame.image.load(os.path.join(base_path, img_name)).convert_alpha()
+    img = pygame.image.load(resource_path(img_name)).convert_alpha()
     w, h = img.get_size()
     img = pygame.transform.scale(img, (w * DOOR_SCALE, h * DOOR_SCALE))
     door_images.append(img)
@@ -230,7 +228,7 @@ while running:
                         pygame.quit()
                         subprocess.Popen([
                             sys.executable,
-                            os.path.join(base_path, DOOR_SCRIPTS[idx])
+                            resource_path(DOOR_SCRIPTS[idx])
                         ])
                         running = False
                         break
