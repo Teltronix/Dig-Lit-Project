@@ -1,5 +1,6 @@
 import pygame
 import os
+import sys
 from util import resource_path
 
 pygame.init()
@@ -33,3 +34,4 @@ while running:
     pygame.display.update()              # Show everything
 
 pygame.quit()
+sys.exit()
