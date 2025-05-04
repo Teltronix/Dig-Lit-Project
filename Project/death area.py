@@ -27,7 +27,7 @@ ekg_x = 0
 points = []
 
 # The script to run after 15 seconds:
-NEXT_SCRIPT = 'Maze.py'  # ← replace with your target file
+NEXT_SCRIPT = 'Main.py'  # ← replace with your target file
 
 # Record when we started
 start_time = pygame.time.get_ticks()
@@ -43,7 +43,7 @@ while running:
             running = False
 
     # After 15 seconds, launch the next script once
-    if not launched and now - start_time >= 15000:
+    if not launched and now - start_time >= 6000:
         launched = True
         pygame.quit()
         # Build absolute path to the next script

@@ -110,7 +110,7 @@ def draw_bleeding_animation():
         global next_file, running
         if bleed_frame >= len(bleed_frames):
             bleeding = False
-            next_file = "Maze.py"
+            next_file = "Main.py"
             running = False
 
     screen.fill(WHITE)
