@@ -18,3 +18,4 @@ for index, image in enumerate(images):
 
 # Save the sprite sheet
 sheet.save('Person.png')
+
