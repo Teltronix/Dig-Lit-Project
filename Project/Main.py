@@ -2,6 +2,7 @@ import pygame
 import spritesheet
 import subprocess
 import os
+import sys
 from util import resource_path
 
 pygame.init()
@@ -104,3 +105,4 @@ while running:
     pygame.display.flip()
 
 pygame.quit()
+sys.exit()
